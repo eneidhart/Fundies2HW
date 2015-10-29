@@ -78,13 +78,17 @@ class Student {
 }
 
 interface IList<T> {
-    boolean contains(T that);
-    void append(T that);
+    public boolean contains(T that);
+    public IList<T> append(IList<T> that);
 }
 
 class MtList<T> implements IList<T> {
     public boolean contains(T that) {
         return false;
+    }
+    
+    public IList<T> append(IList<T> that) {
+        return that;
     }
 }
 
@@ -100,6 +104,11 @@ class ConsList<T> implements IList<T> {
         return this.first.equals(that) ||
                 this.rest.contains(that);
     }
+    
+    public IList<T> append(IList<T> that) {
+        return new Cons<T>(this.first, this.rest.append(that));
+    } 
+    
     public <R> R accept(IListVisitor<T, R> fun) {
         return fun.visitMtList<T>(this);
     }
