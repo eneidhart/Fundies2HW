@@ -3,28 +3,25 @@ class Course {
     String name;
     Instructor instructor;
     IList<Student> students;
-    Course(String n, Instructor i, IList<Student> s) {
-        this(n, i);
-        this.students = s;
-    }
     
     Course(String n, Instructor i) {
         this.name = n;
         this.instructor = i;
-        this.students = new MtList<Student>;
+        this.instructor.addCourse(this);
+        this.students = new MtList<Student>();
     }
     
-    
+    public void addStudent(Student that) {
+        this.students.append(new ConsList<Student>(that, new MtList<Student>()));
+    }
     
     public String getName() {
         return this.name;
     }
-    public boolean sameCourse(Course that) {
-        return this.name.equals(that.name) &&
-                this.instructor.sameInstructor(that.instructor);
+    
+    public Instructor getInstructor() {
+        return this.instructor;
     }
-    
-    
 }
 
 class Instructor {
@@ -37,8 +34,13 @@ class Instructor {
     public String getName() {
         return this.name;
     }
-    public boolean sameInstructor(Instructor that) {
-        return this.name.equals(that.name);
+    
+    public void addCourse(Course c) {
+        this.courses.append(new ConsList<Course>(c, new MtList<Course>()));
+    }
+    
+    public boolean dejavu(Student that) {
+        return this.courses.containsElements(that.getCourses()) > 1;
     }
 }
 
@@ -57,21 +59,23 @@ class Student {
     public int getId() {
         return this.id;
     }
-    public boolean sameStudent(Student that) {
-        return this.name.equals(that.name) &&
-                this.id == that.id;
+    
+    public IList<Course> getCourses() {
+        return this.courses;
     }
-    void enroll(Course c) {
-        if(this.courses.contains(this)) {
+    
+    public void enroll(Course c) {
+        if(this.courses.contains(c)) {
             throw new RuntimeException("Student is already enrolled!");
         }
         else {
             this.courses = new ConsList<Course>(c, this.courses);
+            c.addStudent(this);
         }
     }
     // determines whether the given Student is in any of the same classes as this Student
-    public boolean classmates(Student c) {
-        return this.student.contains(c);
+    public boolean classmates(Student that) {
+        return this.courses.containsElements(that.getCourses()) > 0;
 
     }
 
@@ -80,6 +84,7 @@ class Student {
 interface IList<T> {
     public boolean contains(T that);
     public IList<T> append(IList<T> that);
+    public int containsElements(IList<T> that);
 }
 
 class MtList<T> implements IList<T> {
@@ -89,6 +94,10 @@ class MtList<T> implements IList<T> {
     
     public IList<T> append(IList<T> that) {
         return that;
+    }
+    
+    public int containsElements(IList<T> that) {
+        return 0;
     }
 }
 
@@ -106,34 +115,20 @@ class ConsList<T> implements IList<T> {
     }
     
     public IList<T> append(IList<T> that) {
-        return new Cons<T>(this.first, this.rest.append(that));
+        return new ConsList<T>(this.first, this.rest.append(that));
     } 
     
-    public <R> R accept(IListVisitor<T, R> fun) {
-        return fun.visitMtList<T>(this);
+    public int containsElements(IList<T> that) {
+        if (that.contains(this.first)) {
+            return 1 + that.containsElements(this.rest);
+        }
+        else {
+            return that.containsElements(this.rest);
+        }
     }
 }
 
-interface IListVisitor<T, R> {
-    R visit(MtList<T> that);
-    R visit(ConsList<T> that);
-}
 
-class MapVisitor<T, R> implements IListVisitor<T, IList<R>> {
-    IFunc<T, R> func;
-
-    MapVisitor(IFunc<T, R> func) {
-        this.func = func;
-    }
-
-    public IList<R> visit(Empty<T> that) {
-        return new Empty<R>();
-    }
-
-    public IList<R> visit(Cons<T> that) {
-        return new Cons<R>(func.apply(that.first), that.rest.accept(this));
-    }
-}
 
 class ExamplesRegistrar {
 
@@ -148,4 +143,9 @@ class ExamplesRegistrar {
     Instructor instructor3 = new Instructor("leena");
     Instructor instructor4 = new Instructor("olin");
     Instructor instructor5 = new Instructor("ben");
+    
+    Course fundies1 = new Course("Fundamentals 1", this.instructor3);
+    Course fundies2 = new Course("Fundamentals 2", this.instructor1);
+    Course ood = new Course("Object Oriented Design", this.instructor1);
+    Course logic = new Course("Logic and Computation", this.instructor3);
 }
