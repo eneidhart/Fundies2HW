@@ -4,10 +4,18 @@ class Course {
     Instructor instructor;
     IList<Student> students;
     Course(String n, Instructor i, IList<Student> s) {
-        this.name = n;
-        this.instructor = i;
+        this(n, i);
         this.students = s;
     }
+    
+    Course(String n, Instructor i) {
+        this.name = n;
+        this.instructor = i;
+        this.students = new MtList<Student>;
+    }
+    
+    
+    
     public String getName() {
         return this.name;
     }
@@ -71,7 +79,7 @@ class Student {
 
 interface IList<T> {
     boolean contains(T that);
-
+    void append(T that);
 }
 
 class MtList<T> implements IList<T> {
