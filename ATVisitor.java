@@ -5,6 +5,16 @@ interface IATVisitor<R> {
     R visit(Person that);
 }
 
+class NamesVisitor implements IATVisitor<IList<String>> {
+    IList<String> visit(Unknown that) {
+        return new Empty<String>();
+    }
+    
+    IList<String> visit(Person that) {
+        return new Cons<String>(that.name, that.mom.accept(this).append(that.dad.accept(this)));
+    }
+}
+
 interface IAT {
     // To compute the number of known ancestors of 
     // this ancestor tree (excluding this ancestor tree itself)
@@ -153,6 +163,7 @@ interface IList<T> {
     // result of appending the latter onto the former
     public IList<T> append(IList<T> that);
 }
+
 class Cons<T> implements IList<T> {
     T first;
     IList<T> rest;
@@ -160,13 +171,14 @@ class Cons<T> implements IList<T> {
         this.first = first;
         this.rest = rest;
     }
-    // 
+    // Adds that list to this list
     public IList<T> append(IList<T> that) {
         return new Cons<T>(this.first, this.rest.append(that));
     } 
 }
 
 class Empty<T> implements IList<T> {
+    //Adds that list to this list
     public IList<T> append(IList<T> that) {
         return that;
     }
