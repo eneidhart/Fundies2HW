@@ -66,8 +66,6 @@ class Unknown implements IAT {
     public <R> R accept(IATVisitor<R> visitor) {
         return visitor.visit(this);
     }
-
-
 }
 // to represent a person in an IAT
 class Person implements IAT {
