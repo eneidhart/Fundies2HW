@@ -1,16 +1,16 @@
 import tester.*; 
 
 interface IATVisitor<R> {
-    R visit(Unknown that);
-    R visit(Person that);
+    public R visit(Unknown that);
+    public R visit(Person that);
 }
 
 class NamesVisitor implements IATVisitor<IList<String>> {
-    IList<String> visit(Unknown that) {
+    public IList<String> visit(Unknown that) {
         return new Empty<String>();
     }
     
-    IList<String> visit(Person that) {
+    public IList<String> visit(Person that) {
         return new Cons<String>(that.name, that.mom.accept(this).append(that.dad.accept(this)));
     }
 }
@@ -18,36 +18,35 @@ class NamesVisitor implements IATVisitor<IList<String>> {
 interface IAT {
     // To compute the number of known ancestors of 
     // this ancestor tree (excluding this ancestor tree itself)
-    int count();
+    public int count();
     // To compute the number of known ancestors of 
     // this ancestor tree (*including* this ancestor tree itself)
-    int countHelp();
+    public int countHelp();
     // To compute how many ancestors of this ancestor tree (excluding this ancestor tree itself)
     // are women older than 40 (in the current year).
-    int femaleAncOver40();
+    public int femaleAncOver40();
     // To compute how many ancestors of this ancestor tree (*including* this ancestor tree itself)
     // are women older than 40 (in the current year).
-    int femaleAncOver40Help();
+    public int femaleAncOver40Help();
     // To determine if this ancestry tree is well-formed
-    boolean wellFormed();
+    public boolean wellFormed();
     // To determine if this ancestry tree is older than the given year of birth,
     // and its parents are well-formed
-    boolean wellFormedHelp(int childYob);
+    public boolean wellFormedHelp(int childYob);
     // To return the younger of this ancestor tree and the given ancestor tree
-    IAT youngerIAT(IAT other);
+    public IAT youngerIAT(IAT other);
     // To return either this ancestor tree (if this ancestor tree is younger
     // than the given yob) or the given ancestry tree
-    IAT youngerIATHelp(IAT other, int otherYob);
+    public IAT youngerIATHelp(IAT other, int otherYob);
     // To compute the youngest parent of this ancestry tree
-    IAT youngestParent();
+    public IAT youngestParent();
     // To compute the youngest grandparent of this ancestry tree
-    IAT youngestGrandparent();
+    public IAT youngestGrandparent();
     // accepts an IATVisitor of type T
     public <R> R accept(IATVisitor<R> visitor);
 }
 // to represent an Unknown in an IAT
 class Unknown implements IAT {
-    Unknown() { }
     // To compute the number of known ancestors of this Unknown (excluding this Unknown itself)
     public int count() { return 0; }
     // To compute the number of known ancestors of this Unknown (*including* this Unknown itself)
@@ -207,10 +206,14 @@ class ExamplesIAT {
 
     IAT andrew = new Person("Andrew", 2001, true, this.bree, this.bill);
     
+    IAT unknown = new Unknown();
+    
     // List of strings for tests
     IList<String> mt = new Empty<String>();
     IList<String> enidList = new Cons<String>("Enid", mt);
     IList<String> davidList = new Cons<String>("David", new Cons<String>("Edward", mt));
+    
+    IATVisitor<IList<String>> nv = new NamesVisitor();
 
     boolean testCount(Tester t) {
         return
@@ -244,5 +247,22 @@ class ExamplesIAT {
                 t.checkExpect(this.bree.youngestGrandparent(), this.dixon) &&
                 t.checkExpect(this.andrew.youngestGrandparent(), this.candace) &&
                 t.checkExpect(new Unknown().youngestGrandparent(), new Unknown());
+    }
+    
+    boolean testAppend(Tester t) {
+        return
+                t.checkExpect(this.mt.append(this.enidList), this.enidList) &&
+                t.checkExpect(this.enidList.append(this.mt), this.enidList) &&
+                t.checkExpect(this.enidList.append(this.davidList), 
+                        new Cons<String>("Enid", 
+                                new Cons<String>("David", 
+                                        new Cons<String>("Edward", mt))));
+    }
+    
+    boolean testVisitor(Tester t) {
+        return
+                t.checkExpect(this.unknown.accept(this.nv), this.mt) &&
+                t.checkExpect(this.enid.accept(nv), this.enidList) &&
+                t.checkExpect(this.david.accept(nv), this.davidList);
     }
 }

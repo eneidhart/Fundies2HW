@@ -1,11 +1,18 @@
 import tester.*; 
 interface IComparator<T> {
-    // Returns a
+    // Returns an int:
+    //-1 if t1 < t2
+    //0 if t1 == t2
+    //+1 if t1 > t2
     int compare(T t1, T t2);
 }
 
 // compares strings lexicographically (in alphabetical order)
 class StringLexCompGen implements IComparator<String> {
+    // Returns an int:
+    //-1 if t1 < t2
+    //0 if t1 == t2
+    //+1 if t1 > t2
     public int compare(String t1, String t2) {
         return t1.compareTo(t2);
     }
@@ -13,6 +20,10 @@ class StringLexCompGen implements IComparator<String> {
 
 // compares the Strings by their length from the shortest to the longest
 class StringLengthCompGen implements IComparator<String> {
+    // Returns an int:
+    //-1 if t1 < t2
+    //0 if t1 == t2
+    //+1 if t1 > t2
     public int compare(String t1, String t2) {
         return t1.length() - t2.length();
     }
@@ -27,6 +38,8 @@ interface IFunc<T, R> {
     //applies an operation to T and produces a R
     R apply(T t);
 }
+
+
 
 interface IList<T> {
     // confirms whether this list is sorted
@@ -117,14 +130,17 @@ class Empty<T> implements IList<T> {
         return given.isEmpty();
     }
 
+    // returns true if this list is empty (it is)
     public boolean isEmpty() {
         return true;
     }
 
+    // insert an object into sorted location in this list
     public IList<T> insert(IComparator<T> comp, T t) {
         return new Cons<T>(t, this);
     }
 
+    //add another list to the end of this list
     public IList<T> append(IList<T> that) {
         return that;
     }
@@ -139,6 +155,7 @@ class Empty<T> implements IList<T> {
         return new Empty<R>();
     }
 
+    // accepts a visitor
     public <R> R accept(IListVisitor<T, R> visitor) {
         return visitor.visit(this);
     }
@@ -196,7 +213,7 @@ class Cons<T> implements IList<T> {
         return given.sameList(comp, this.rest);
     }
 
-    // Determines if a list is empty
+    // Determines if a list is empty (it's not)
     public boolean isEmpty() {
         return false;
     }
@@ -211,6 +228,7 @@ class Cons<T> implements IList<T> {
         }
     }
 
+    // appends another list to the end of this one
     public IList<T> append(IList<T> that) {
         return new Cons<T>(this.first, this.rest.append(that));
     } 
@@ -224,11 +242,13 @@ class Cons<T> implements IList<T> {
             return this.rest.filter(pred);
         }
     }
+    
     // map the list of T to a list of R
     public <R> IList<R> map(IFunc<T, R> func) {
         return new Cons<R>(func.apply(this.first), this.rest.map(func));
     }
 
+    //accepts a visitor
     public <R> R accept(IListVisitor<T, R> visitor) {
         return visitor.visit(this);
     }
@@ -239,6 +259,7 @@ interface IListVisitor<T, R> {
     R visit(Cons<T> that);
 }
 
+// a visitor which applies a function to every item in a list
 class MapVisitor<T, R> implements IListVisitor<T, IList<R>> {
     IFunc<T, R> func;
 
@@ -246,10 +267,12 @@ class MapVisitor<T, R> implements IListVisitor<T, IList<R>> {
         this.func = func;
     }
 
+    //visit an empty list
     public IList<R> visit(Empty<T> that) {
         return new Empty<R>();
     }
 
+    //visit a cons list, applying the function to every item therein
     public IList<R> visit(Cons<T> that) {
         return new Cons<R>(func.apply(that.first), that.rest.accept(this));
     }
@@ -257,4 +280,5 @@ class MapVisitor<T, R> implements IListVisitor<T, IList<R>> {
 
 class ExamplesLists {
 
+    
 }
